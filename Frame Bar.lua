@@ -28,7 +28,7 @@ gui.text(8,56,"Hit Stop: " .. hitstop)
 
 if bit.band(rb(anipnt+(cell*0x18)+1),0x80) ~= 0x80 then
 		repeat cell = cell + 1
-		until bit.band(rb(anipnt+(cell*0x18)+1),0xC0) ~= 0x00 -- or bit.band(rb(anipnt+(cell*0x18)+1),0x40) == 0x40
+		until bit.band(rb(anipnt+(cell*0x18)+1),0xC0) ~= 0x00
 	else
 		cell = 0
 	end
