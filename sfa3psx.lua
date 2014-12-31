@@ -37,10 +37,10 @@ local legs = legspnt + (rb(boxset + 0x02) * 0x08)
 local attk = attkpnt + (0x10 * 0x20) --Change this for a different Attack box
 
 collisionbox(push,px,py,0x0FFFFF00,pflip)
-collisionbox(head,px,py,{0x255,0x255,0,0},pflip)
-collisionbox(body,px,py,{0x255,0x255,0,0},pflip)
-collisionbox(legs,px,py,{0x255,0x255,0,0},pflip)
-collisionbox(attk,px,py,{0x255,0,0,0},pflip)
+collisionbox(head,px,py,{0xFF,0xFF,0x00,0x00},pflip)
+collisionbox(body,px,py,{0xFF,0xFF,0x00,0x00},pflip)
+collisionbox(legs,px,py,{0xFF,0xFF,0x00,0x00},pflip)
+collisionbox(attk,px,py,{0xFF,0x00,0x00,0x00},pflip)
 
 drawaxis(px,py,8)
 
