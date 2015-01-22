@@ -42,7 +42,6 @@ padr = 0x200F82 - 0x28C
 for p = 0,1,1 do
 	padr = padr + 0x28C
 	local px = scale(rws(padr + 0x06))
-	local py = scale(rws(padr + 0x0A)) - 16
 	local life = rws(padr+0x194)
 	local meter = rw(padr+0x27E)
 	local flag1 = rb(padr + 0x04)
@@ -66,6 +65,11 @@ for p = 0,1,1 do
 		pflip = -1
 	else
 		pflip = 1
+	end
+	if pyflip == 1 then
+	py = scale(rws(padr + 0x0A)) - 210
+	else
+	py = scale(rws(padr + 0x0A)) - 16
 	end
 
 if active == 0 then 
@@ -108,7 +112,7 @@ h = y + scale(rws(boxadr + 0x6))
 else 
 x = scale(rws(boxadr + 0x0)) * flip + plx 
 w = x + scale(rws(boxadr+ 0x2)) * flip
-y = ply + scale(rws(boxadr + 0x4))--Only part messed up maybe calculation for player y changes
+y = ply - scale(rws(boxadr + 0x4))
 h = y - scale(rws(boxadr + 0x6))
 end
 --gui.drawline(plx,ply,x,y) Debug
