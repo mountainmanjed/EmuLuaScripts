@@ -4,7 +4,7 @@ hurtcolor = 0xFFFF0000
 
 --[[
 Need to do
-Missing Yflip Used on some specials especially Drunken Jackie's Raising Tackle.
+Y flip hacked in
 Projectiles
 Player Activation need to hide hitboxes on Mysterious Lion's Super
 
