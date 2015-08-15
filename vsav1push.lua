@@ -35,7 +35,9 @@ bitrng = bit.band(rng,0x1F)
 padr= 0xFF8400
 pbc = rb(padr+ 0x170)
 pbtimer = rb(padr + 0x1ab)
-binaryview(bitrng,pbc)
+guess = cps2rng(0xff80D4) + rng
+
+binaryview(bitrng,pbc,guess)
 
 gui.box(16,24,16+pbtimer*4,30,0xFF0000FF,0xFFFFFFFF)
 
@@ -44,6 +46,16 @@ gui.text( 84,198,string.format("Timer: %02X",pbtimer))
 gui.text(128,198,string.format("RNG: %02X",bitrng))
 end
 
+function cps2rng(location)
+value0 = rw(location)
+
+value1 = bit.band(value0*3,0xFFFF)
+value2 = bit.rshift(value1,8)
+value3 = bit.band(value2,0xFFFF)
+
+return value3
+
+end
 
 function binaryview (val,pbc)
 gui.text(16,32,pushtable[pbc+1])
