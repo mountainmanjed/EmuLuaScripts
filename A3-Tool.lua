@@ -2,6 +2,7 @@ local rb, rbs, rw, rws, rd = memory.readbyte, memory.readbytesigned, memory.read
 local wb, ww, wd = memory.writebyte, memory.writeword, memory.writedword
 freezeframe = 0
 
+
 --[[
 Sodom Check
 0298DE: cmpi.b  #$6, ($102,A6)
@@ -16,6 +17,8 @@ camy = rws(0xff8294)
 	
 	--Timer
 	wb(0xFF8109,0x63)
+	ww(0xFF8450,0x0090)
+	ww(0xFF8850,0x0090)
 	if freezeframe == 1 then
 	wb(0xff8432,0xFF)
 	end
@@ -27,11 +30,47 @@ local py = 244 - rw(adr + 0x014) + camy
 local anipnt = rd(adr + 0x1C)
 local boxset = rd(adr + 0x88) + rb(anipnt + 0x08)*4
 local charid = rb(adr + 0x102)
-local stable1 = 0xDD292
-local stable2 = 0xDCB92
-local spmvstart = rd(charid*4 + stable1)
-local propertystart = rd(charid*4 + stable2)
+local stable1 = 0xDD292 --Special Moves inputs
+local stable2 = 0xDCB92 --Attack Properties 
+local stable3 = 0xDCC12 --Special Code
+local animationtable = 0xDD412
 
+--dd292
+
+--[[
+01FBC2: move.b  ($102,A4), D1
+01FBC6: add.w   D1, D1
+01FBC8: lea     $32c094.l, A0
+01FBCE: add.w   (A0,D1.w), D0
+01FBD2: lea     (A0,D0.w), A0
+01FBD6: move.l  A0, ($14c,A4)
+]]
+local paltable = 0x32C094
+local paladd =  rw(charid*2 + paltable)
+local palstart = paladd + paltable --Starts on Xism Punch Palette
+--[[
+Each Palette is 0xA0 in size
+
+A0*0 = X ism P
+A0*1 = X ism K
+A0*2 = A/Z ism P
+A0*3 = A/Z ism K
+A0*4 = V ism P
+A0*5 = V ism K
+
+
+3C0 size each character
+Highest offset 6580
+only 30 characters are used
+there is another table after this one
+
+Total size 0xB440
+
+]]
+
+local spmvstart = rd(charid*4 + stable1)
+local spmvpropt = rd(charid*4 + stable3)
+local propertystart = rd(charid*4 + stable2)
 
 if rb(adr + 0x0B) == 0 then
 pflip = 1
@@ -43,14 +82,15 @@ end
 gui.text(42,8,"Anim Pointer: " .. hex(anipnt))
 gui.text(42,0,"Animation: " .. rb(adr + 0x32) .. "/" .. rb(anipnt))
 gui.text(42,16,"Character: " .. hex(rb(adr+0x102)))
-gui.text(42,24,"Specials: " .. hex(spmvstart))
+gui.text(8,184,"Specials Inputs: " .. hex(spmvstart))
+gui.text(8,192,"Specials Code: " .. hex(spmvpropt))
 gui.text(108,24,"Properties: " .. hex(propertystart))
 
 gui.text(142,0,"Box Setup PT: " .. hex(boxset))
 --ww(0xff843a,0x6fff)
 --ww(0xff883a,0x6fff)
 
-gui.text(8,200,"X,Y: " .. rb(0xff8411) .. ", " .. rb(0xff8415))
+gui.text(8,200,"X,Y: " .. px .. ", " .. py)
 
 ------------------------
 ----------Push----------
@@ -69,10 +109,10 @@ local head = headpnt + (rb(boxset + 0x00) * 0x08)
 gui.box(224,34,383,54,{0x00,0xFF,0xFF,0x40})
 
 gui.text(228,36,"Head Pointer: " .. hex(head))
-gui.text(228,44,"XP: " .. hex(rw(head + 0x00)))
-gui.text(268,44,"YP: " .. hex(rw(head + 0x02)))
-gui.text(308,44,"XR: " .. hex(rw(head + 0x04)))
-gui.text(348,44,"YR: " .. hex(rw(head + 0x06)))
+gui.text(228,44,string.format("XP: %04X",rw(head + 0x00)))
+gui.text(268,44,string.format("YP: %04X",rw(head + 0x02)))
+gui.text(308,44,string.format("XR: %04X",rw(head + 0x04)))
+gui.text(348,44,string.format("YR: %04X",rw(head + 0x06)))
 
 
 ------------------------
@@ -83,10 +123,10 @@ local body = bodypnt + (rb(boxset + 0x01) * 0x08)
 gui.box(224,55,383,75,{0xFF,0x88,0xFF,0x40})
 
 gui.text(228,57,"Body Pointer: " .. hex(body))
-gui.text(228,65,"XP: " .. hex(rw(body + 0x00)))
-gui.text(268,65,"YP: " .. hex(rw(body + 0x02)))
-gui.text(308,65,"XR: " .. hex(rw(body + 0x04)))
-gui.text(348,65,"YR: " .. hex(rw(body + 0x06)))
+gui.text(228,65,string.format("XP: %04X",rw(body + 0x00)))
+gui.text(268,65,string.format("YP: %04X",rw(body + 0x02)))
+gui.text(308,65,string.format("XR: %04X",rw(body + 0x04)))
+gui.text(348,65,string.format("YR: %04X",rw(body + 0x06)))
 
 
 ------------------------
@@ -97,12 +137,12 @@ local legs = legspnt + (rb(boxset + 0x02) * 0x08)
 gui.box(224,76,383,96,{0xFF,0x88,0x00,0x40})
 
 gui.text(228,78,"Legs Pointer: " .. hex(legs))
-gui.text(228,86,"XP: " .. hex(rw(legs + 0x00)))
-gui.text(268,86,"YP: " .. hex(rw(legs + 0x02)))
-gui.text(308,86,"XR: " .. hex(rw(legs + 0x04)))
-gui.text(348,86,"YR: " .. hex(rw(legs + 0x06)))
+gui.text(228,86,string.format("XP: %04X",rw(legs + 0x00)))
+gui.text(268,86,string.format("YP: %04X",rw(legs + 0x02)))
+gui.text(308,86,string.format("XR: %04X",rw(legs + 0x04)))
+gui.text(348,86,string.format("YR: %04X",rw(legs + 0x06)))
 
-------------------------
+------------------------,string.format("XP: %04X",rw(
 ---------Attack---------
 ------------------------
 local atkpointer = rd(adr + 0xA0)
@@ -110,14 +150,16 @@ local attk = atkpointer + (rb(anipnt + 0x09) * 0x20)
 gui.box(8,34,168,76,{0xFF,0x00,0x00,0x40})
 
 gui.text(012,36,"Attk Pointer: " .. hex(attk))
-gui.text( 12,44,"XP: " .. hex(rw(attk + 0x00)))
-gui.text( 52,44,"YP: " .. hex(rw(attk + 0x02)))
-gui.text( 92,44,"XR: " .. hex(rw(attk + 0x04)))
-gui.text(132,44,"YR: " .. hex(rw(attk + 0x06)))
+gui.text( 12,44,string.format("XP: %04X",rw(attk + 0x00)))
+gui.text( 52,44,string.format("YP: %04X",rw(attk + 0x02)))
+gui.text( 92,44,string.format("XR: %04X",rw(attk + 0x04)))
+gui.text(132,44,string.format("YR: %04X",rw(attk + 0x06)))
 
-gui.text( 12,52,"DM: " .. hex(rb(attk + 0x08)))
+gui.text( 12,52,string.format("DM: %02X",rb(attk + 0x08)))
 
-gui.text( 92,52,"ST: " .. hex(rb(attk + 0x0C)))
+gui.text( 92,52,string.format("ST: %02X",rb(attk + 0x0C)))
+
+gui.text( 12,68,string.format("PR: %02X",rb(attk + 0x19)))
 
 
 --Boxes
