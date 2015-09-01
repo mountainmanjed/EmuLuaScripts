@@ -57,14 +57,14 @@ return value3
 
 end
 
-function binaryview (val,pbc,g)
+function binaryview (val,pbc,g,g2)
 gui.text(16,32,pushtable[pbc+1])
 
-place = val*4
-gui.text(140-place,40,'^')
-
 maybe = bit.band(g,0x1F)*4
-gui.text(140-maybe,40,'^',0x000000FF,0xFFFFFFFF)
+gui.text(140-maybe,40,'^','yellow')
+
+place = val*4
+gui.text(140-place,40,'^','green')
 
 end
 
