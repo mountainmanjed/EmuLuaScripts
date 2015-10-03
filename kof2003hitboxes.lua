@@ -1,4 +1,3 @@
---SVC script
 local rb, rbs, rw, rws, rd, rds = memory.readbyte, memory.readbytesigned, memory.readword, memory.readwordsigned, memory.readdword, memory.readdwordsigned
 local wb, ww, wd = memory.writebyte, memory.writeword, memory.writedword
 
