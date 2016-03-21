@@ -110,6 +110,7 @@ if proj == 0 then
 end
 
 end
+dmgscaler = rw(0x200128)
 
 padr = 0x200F82 - 0x28C
 for p = 0,1,1 do
@@ -125,6 +126,7 @@ for p = 0,1,1 do
 	local pxflip = bit.band(flag3,0x02)
 	--Hurt boxes Data
 	local id = rw(padr + 0x190)
+	local p2id = rw(padr + 0x190 + 0x28C)
 	local id2 = rw(padr + 0x60)
 	local address = rd(0xD6164 + (id*4))
 	local address2 = rd(address + (id2*4))
@@ -134,16 +136,17 @@ for p = 0,1,1 do
 	local atkmath = (loop+1)*8
 	local atkaddr = atkmath + address2+4
 	--Attack Data
-	local basedmg = 0xD6164
-	local dmgpnt1 = rd(id*4 + basedmg)
-	local dmgpnt = rd(id2*4 + dmgpnt1)
-	
+	local dmgbase = rb(atkaddr + 0x0D)
+	local dmgout1 = dmgbase*dmgscaler
+		
 	--Defense Data
-	local basedef = 0xD5F24 + id*64
-	local defsel = bit.band(rb(padr+0x194),0x7C)/2
+	local basedef = 0xD5F24 + p2id*64
+	local defsel = bit.band(rb(padr+0x194+0x28c),0x7C)/2
 	local defval = rw(basedef + defsel)
 	local defval2 = (256 - defval)/2
 	local defval3 = 256 - defval2
+	
+	local damagef = (dmgout1*defval3)/16
 	
 	if pxflip == 0x02 then
 		pflip = -1
@@ -168,11 +171,19 @@ drawaxis(px,py,scale(8))
 
 gui.text(12 + p*168,20,"Life: " .. life)
 gui.text(30 + p*200,222,"Meter: " .. meter)
-gui.text(32 + p*168,32,"Address: "  .. hexval(padr))
+--gui.text(32 + p*168,32,"Address: "  .. hexval(padr))
 --gui.text(4 + p*168,64,string.format("TestAtk: %X",dmgpnt))
-gui.text(4 + p*168,64,string.format("Defense1: %d",defval))
-gui.text(4 + p*168,72,string.format("Defense2: %d",defval2))
-gui.text(4 + p*168,80,string.format("Defense3: %d",defval3))
+--attacks
+--gui.text(4 + p*168,64,string.format("Defense1: %d",defval))
+--gui.text(4 + p*168,64,string.format("Defense1: %d",defval))
+
+if p == 0 then
+	gui.text(12 + 168,32,string.format("2P Defense Base: %d",defval))
+	gui.text(12 + 168,40,string.format("2P Defense Final: %d",defval3))
+	
+end
+
+
 	
 --Hurt
 		if loop >= 0 then 
@@ -186,6 +197,10 @@ gui.text(4 + p*168,80,string.format("Defense3: %d",defval3))
 	if p == 0 then
 		if rw(0x2000E6) ~= 0 then
 		colbox(atkaddr,px,py,pflip,pyflip,0xFF000000)
+		gui.text(32 + p*168,32,string.format("DamageBase: %d",dmgbase))
+		gui.text(32 + p*168,40,string.format("Dmgfinal: %d",damagef))
+		
+		
 		end
 	else
 		if rw(0x2000E4) ~=0 then
